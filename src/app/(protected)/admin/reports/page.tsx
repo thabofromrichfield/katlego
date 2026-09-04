@@ -166,15 +166,15 @@ export default function ReportsPage() {
       {managers.length > 0 && (
         <div style={{ marginBottom: 12 }}>
           <SectionTitle icon={UserCheck} title="Manager Teams" sub="Performance snapshot per manager" color="#ca8a04" />
-          <div style={{ background: 'white', borderRadius: 16, border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(15,23,42,0.05)' }}>
+          <div style={{ background: 'white', borderRadius: 16, border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(15,23,42,0.05)', overflowX: 'auto' }}>
             {/* Header row */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 80px 80px 80px', gap: 12, padding: '12px 20px', borderBottom: '1px solid #f8fafc' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) repeat(5, minmax(56px, 80px))', gap: 12, padding: '12px 20px', borderBottom: '1px solid #f8fafc', minWidth: 440 }}>
               {['Manager', 'Team', 'Online', 'Trips', 'Done', 'Vehicles'].map(h => (
                 <p key={h} style={{ fontSize: 10, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.08em', textAlign: h === 'Manager' ? 'left' : 'center' }}>{h}</p>
               ))}
             </div>
             {managers.map((m, i) => (
-              <div key={m.manager_id} style={{ display: 'grid', gridTemplateColumns: '1fr 80px 80px 80px 80px 80px', gap: 12, padding: '14px 20px', borderBottom: i < managers.length - 1 ? '1px solid #f8fafc' : 'none', alignItems: 'center', transition: 'background 0.12s' }}
+              <div key={m.manager_id} style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) repeat(5, minmax(56px, 80px))', gap: 12, padding: '14px 20px', borderBottom: i < managers.length - 1 ? '1px solid #f8fafc' : 'none', alignItems: 'center', transition: 'background 0.12s', minWidth: 440 }}
                 onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#fafafa'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}
               >

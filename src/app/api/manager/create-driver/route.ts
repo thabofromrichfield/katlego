@@ -13,7 +13,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Forbidden — manager/admin only' }, { status: 403 })
     }
 
-    const { email, password, full_name, phone, license_number, license_class, license_expiry } = await req.json()
+    const { email, password, full_name, phone } = await req.json()
     if (!email || !password || !full_name) {
       return NextResponse.json({ error: 'Name, email and password are required' }, { status: 400 })
     }
@@ -33,12 +33,17 @@ export async function POST(req: Request) {
     // Update profile to driver role
     await supabase.from('profiles').update({ role: 'driver', phone: phone ?? null, full_name }).eq('id', userId)
 
-    // Create driver record
+    // Create driver record.
+    // License details are NOT captured at driver creation — the DB columns are
+    // NOT NULL, so we store internal placeholders. Admin adds license/registration
+    // details when uploading vehicles to the fleet instead.
+    const expiry = new Date()
+    expiry.setFullYear(expiry.getFullYear() + 5)
     const { data: driver, error: driverErr } = await supabase.from('drivers').insert({
       profile_id: userId,
-      license_number: license_number ?? `DRV-${Date.now()}`,
-      license_class: license_class ?? 'code_8',
-      license_expiry: license_expiry ?? null,
+      license_number: `SYS-${Date.now()}`,
+      license_class: 'code_8',
+      license_expiry: expiry.toISOString().slice(0, 10),
       status: 'off_duty',
     }).select('id').single()
 

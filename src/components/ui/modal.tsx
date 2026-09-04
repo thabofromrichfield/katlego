@@ -41,7 +41,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
       }}
       onClick={e => { if (e.target === overlayRef.current) onClose() }}
     >
-      <div style={{ width: '100%', maxWidth: maxW, background: 'white', borderRadius: 20, boxShadow: '0 24px 64px rgba(15,23,42,0.18)', flexShrink: 0, marginBottom: 24 }}>
+      <div style={{ width: '100%', maxWidth: maxW, minWidth: 0, background: 'white', borderRadius: 20, boxShadow: '0 24px 64px rgba(15,23,42,0.18)', flexShrink: 0, marginBottom: 24, overflow: 'hidden' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid #f1f5f9' }}>
           <h2 style={{ fontSize: 16, fontWeight: 800, color: '#0f172a' }}>{title}</h2>
@@ -55,7 +55,7 @@ export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalPr
           </button>
         </div>
         {/* Body */}
-        <div style={{ padding: '24px', maxHeight: '65vh', overflowY: 'auto' }}>
+        <div style={{ padding: '24px', maxHeight: '65vh', overflowY: 'auto', overflowX: 'hidden', minWidth: 0 }}>
           {children}
         </div>
       </div>

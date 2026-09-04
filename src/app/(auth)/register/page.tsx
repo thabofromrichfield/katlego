@@ -5,27 +5,11 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { Eye, EyeOff, Truck, ArrowRight, AlertCircle, CheckCircle2 } from 'lucide-react'
 
-type Role = 'user' | 'driver' | 'manager' | 'admin'
-
-const ROLES: { role: Role; emoji: string; label: string; desc: string; ring: string; activeBg: string; activeText: string }[] = [
-  { role: 'user',    emoji: '👤', label: 'User',    desc: 'Book & track trips',   ring: '#2563eb', activeBg: '#eff6ff', activeText: '#1d4ed8' },
-  { role: 'driver',  emoji: '🚗', label: 'Driver',  desc: 'Handle trip runs',     ring: '#059669', activeBg: '#f0fdf4', activeText: '#047857' },
-  { role: 'manager', emoji: '📊', label: 'Manager', desc: 'Manage fleet & trips', ring: '#7c3aed', activeBg: '#f5f3ff', activeText: '#6d28d9' },
-  { role: 'admin',   emoji: '⚡', label: 'Admin',   desc: 'Full system access',   ring: '#d97706', activeBg: '#fffbeb', activeText: '#92400e' },
+const USER_PERKS = [
+  'Request trips immediately or schedule ahead',
+  'Track trip status in real time',
+  'View your complete trip history',
 ]
-
-const ROLE_PERKS: Record<Role, string[]> = {
-  user:    ['Request trips immediately or schedule ahead', 'Track trip status in real time', 'View your complete trip history'],
-  driver:  ['See and manage your trip assignments', 'Start & complete trips with one tap', 'Track your stats and performance'],
-  manager: ['Full fleet & driver management', 'Approve or reject trip requests', 'Access reports and analytics'],
-  admin:   ['Complete system administration', 'Manage users, roles & permissions', 'All manager capabilities included'],
-}
-
-function getRoleDestination(role: string): string {
-  if (role === 'admin' || role === 'manager') return '/admin'
-  if (role === 'driver') return '/driver'
-  return '/dashboard'
-}
 
 // Consistent plain input — NO icons inside
 function PlainInput({ label, required, hint, type = 'text', value, onChange, placeholder, disabled, rightEl }: {
@@ -64,7 +48,6 @@ function PlainInput({ label, required, hint, type = 'text', value, onChange, pla
 }
 
 export default function RegisterPage() {
-  const [role,     setRole]     = useState<Role>('user')
   const [fullName, setFullName] = useState('')
   const [email,    setEmail]    = useState('')
   const [phone,    setPhone]    = useState('')
@@ -75,12 +58,11 @@ export default function RegisterPage() {
   const [error,    setError]    = useState('')
   const [done,     setDone]     = useState(false)
 
-  const activeRole = ROLES.find(r => r.role === role)!
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     if (!fullName.trim()) { setError('Please enter your full name.'); return }
+    if (!email.trim()) { setError('Please enter your email address.'); return }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return }
     if (password !== confirm) { setError('Passwords do not match.'); return }
     setLoading(true)
@@ -88,14 +70,14 @@ export default function RegisterPage() {
       const supabase = createClient()
       const { data, error: err } = await supabase.auth.signUp({
         email: email.trim(), password,
-        options: { data: { full_name: fullName.trim(), role } },
+        options: { data: { full_name: fullName.trim(), role: 'user' } },
       })
       if (err) { setError(err.message); setLoading(false); return }
       if (data?.session) {
         try {
-          await supabase.from('profiles').upsert({ id: data.user!.id, full_name: fullName.trim(), role, phone: phone.trim() || null }, { onConflict: 'id' })
+          await supabase.from('profiles').upsert({ id: data.user!.id, full_name: fullName.trim(), role: 'user', phone: phone.trim() || null }, { onConflict: 'id' })
         } catch { /* ignore */ }
-        window.location.href = getRoleDestination(role)
+        window.location.href = '/dashboard'
         return
       }
       setDone(true)
@@ -148,13 +130,13 @@ export default function RegisterPage() {
             Join Katlego<br /><span style={{ color: '#60a5fa' }}>Today.</span>
           </h2>
           <p style={{ color: 'rgba(191,219,254,0.7)', fontSize: 15, lineHeight: 1.7, marginBottom: 28 }}>
-            Create your account and start managing logistics smarter.
+            Create your account and start requesting transport.
           </p>
           <div style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 16, padding: 20 }}>
             <p style={{ fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: 2, marginBottom: 12 }}>
-              {activeRole.emoji} {activeRole.label} access includes
+              Your account includes
             </p>
-            {ROLE_PERKS[role].map(perk => (
+            {USER_PERKS.map(perk => (
               <div key={perk} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
                 <div style={{ width: 18, height: 18, background: '#2563eb', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
                   <span style={{ color: 'white', fontSize: 9, fontWeight: 900 }}>✓</span>
@@ -179,34 +161,7 @@ export default function RegisterPage() {
         <div style={{ width: '100%', maxWidth: 440 }}>
           <div style={{ marginBottom: 24 }}>
             <h1 style={{ fontSize: 26, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.5px', marginBottom: 4 }}>Create account</h1>
-            <p style={{ fontSize: 14, color: '#64748b', fontWeight: 500 }}>Choose your account type and fill in your details.</p>
-          </div>
-
-          {/* Role selector */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 20 }}>
-            {ROLES.map(r => {
-              const active = role === r.role
-              return (
-                <button key={r.role} type="button" onClick={() => setRole(r.role)}
-                  style={{
-                    textAlign: 'left', padding: '12px 14px',
-                    borderRadius: 14, border: `2px solid ${active ? r.ring : '#e2e8f0'}`,
-                    background: active ? r.activeBg : 'white',
-                    cursor: 'pointer', transition: 'all 0.15s', position: 'relative',
-                    outline: 'none',
-                  }}
-                >
-                  <span style={{ fontSize: 20, display: 'block', marginBottom: 4 }}>{r.emoji}</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, display: 'block', color: active ? r.activeText : '#374151' }}>{r.label}</span>
-                  <span style={{ fontSize: 11, color: '#94a3b8', display: 'block', lineHeight: 1.4, marginTop: 1 }}>{r.desc}</span>
-                  {active && (
-                    <div style={{ position: 'absolute', top: 8, right: 8, width: 18, height: 18, background: r.ring, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ color: 'white', fontSize: 9, fontWeight: 900 }}>✓</span>
-                    </div>
-                  )}
-                </button>
-              )
-            })}
+            <p style={{ fontSize: 14, color: '#64748b', fontWeight: 500 }}>Fill in your details to start booking trips.</p>
           </div>
 
           {/* Form card */}
@@ -236,7 +191,7 @@ export default function RegisterPage() {
               <button type="submit" disabled={loading} style={{ height: 46, background: loading ? '#93c5fd' : '#2563eb', color: 'white', border: 'none', borderRadius: 12, fontSize: 14, fontWeight: 700, cursor: loading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 4px 16px rgba(37,99,235,0.3)', marginTop: 4 }}>
                 {loading
                   ? <svg style={{ width: 16, height: 16, animation: 'spin 0.75s linear infinite' }} viewBox="0 0 24 24" fill="none"><circle opacity=".25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path opacity=".75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                  : <>Create {activeRole.label} account <ArrowRight style={{ width: 16, height: 16 }} /></>
+                  : <>Create Account <ArrowRight style={{ width: 16, height: 16 }} /></>
                 }
               </button>
               <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
