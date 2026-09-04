@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+/* Map the runtime chart theme (see `:root` below) to Tailwind v4 color
+   utilities (`text-chart-*`, `bg-chart-*`) used by the vendored bklit
+   chart components. `inline` keeps the utilities pointing straight at the
+   `--chart-*` custom properties so dark/light overrides keep working. */
+@theme inline {
+  --color-chart-label: var(--chart-label);
+  --color-chart-tooltip-foreground: var(--chart-tooltip-foreground);
+  --color-chart-tooltip-muted: var(--chart-tooltip-muted);
+  --color-chart-tooltip-background: var(--chart-tooltip-background);
+}
+
 /* ────────────────────────────────────────────────────────────────
    KATLEGO LOGISTICS — DESIGN SYSTEM
    Brand: Professional, Trustworthy, Modern, South African
@@ -81,6 +92,7 @@
   --chart-brush-border: #94a3b8;
   --chart-tooltip-background: #0f172a;
   --chart-tooltip-foreground: #f8fafc;
+  --chart-tooltip-muted: #cbd5e1;
   --chart-tooltip-border: transparent;
   --chart-segment-line: #e2e8f0;
   --chart-segment-background: #f8fafc;

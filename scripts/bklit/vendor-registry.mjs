@@ -30,7 +30,7 @@ const CLOSURE = [
   "utils", "chart-utils", "chart-context", "chart-animation", "chart-tooltip",
   "chart-series", "grid", "x-axis", "shimmering-text",
   "area-chart", "line-chart", "bar-chart", "pie-chart", "ring-chart", "gauge-chart",
-  "legend", "chart-stat-flow",
+  "legend", "chart-stat-flow", "y-axis",
 ];
 
 function readRegistryJson(name) {
