@@ -173,3 +173,114 @@ body { color: var(--text-primary); background: var(--surface-page); font-family:
 
 /* ── Focus ring ── */
 :focus-visible { outline: 2px solid var(--brand-primary); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+/* ════════════════════════════════════════════════════════════════
+   KATLEGO INSIGHTS — premium dashboard design system (scoped .kgl)
+   Brand: Katlego Global Logistics — navy #203040 · accent #f07000
+   Light & dark variants via [data-kgl-theme]. Everything below is
+   namespaced so it never leaks into the rest of the app.
+════════════════════════════════════════════════════════════════ */
+
+.kgl {
+  --kgl-navy: #203040;
+  --kgl-navy-deep: #162438;
+  --kgl-navy-ink: #0f1a2b;
+  --kgl-accent: #f07000;
+  --kgl-accent-bright: #ff8a2a;
+  --kgl-accent-soft: #fdeee1;
+
+  /* light surfaces / text */
+  --kgl-bg: #eef2f7;
+  --kgl-bg-glow-a: rgba(240, 112, 0, 0.10);
+  --kgl-bg-glow-b: rgba(32, 48, 64, 0.06);
+  --kgl-surface: rgba(255, 255, 255, 0.86);
+  --kgl-surface-solid: #ffffff;
+  --kgl-surface-2: #f6f8fb;
+  --kgl-border: rgba(15, 26, 43, 0.08);
+  --kgl-border-strong: rgba(15, 26, 43, 0.14);
+  --kgl-text: #16243a;
+  --kgl-text-2: #43546b;
+  --kgl-muted: #7c8aa0;
+  --kgl-faint: #a7b3c5;
+  --kgl-good: #0ea371;
+  --kgl-good-soft: #d9f3e9;
+  --kgl-bad: #e0483e;
+  --kgl-bad-soft: #fde4e1;
+  --kgl-shadow: 0 10px 30px -12px rgba(22, 36, 58, 0.18), 0 2px 8px -4px rgba(22, 36, 58, 0.08);
+  --kgl-shadow-pop: 0 18px 44px -16px rgba(240, 112, 0, 0.28);
+}
+
+.kgl[data-kgl-theme="dark"] {
+  --kgl-bg: #0c1626;
+  --kgl-bg-glow-a: rgba(240, 112, 0, 0.14);
+  --kgl-bg-glow-b: rgba(56, 130, 255, 0.08);
+  --kgl-surface: rgba(20, 33, 52, 0.72);
+  --kgl-surface-solid: #152238;
+  --kgl-surface-2: rgba(255, 255, 255, 0.035);
+  --kgl-border: rgba(255, 255, 255, 0.07);
+  --kgl-border-strong: rgba(255, 255, 255, 0.14);
+  --kgl-text: #eaf1f9;
+  --kgl-text-2: #aebdcf;
+  --kgl-muted: #7f91a6;
+  --kgl-faint: #54657c;
+  --kgl-accent-soft: rgba(240, 112, 0, 0.14);
+  --kgl-good: #2fc48c;
+  --kgl-good-soft: rgba(47, 196, 140, 0.16);
+  --kgl-bad: #ff6b5e;
+  --kgl-bad-soft: rgba(255, 107, 94, 0.14);
+  --kgl-shadow: 0 18px 44px -18px rgba(0, 0, 0, 0.6), 0 2px 10px -4px rgba(0, 0, 0, 0.4);
+  --kgl-shadow-pop: 0 18px 44px -16px rgba(240, 112, 0, 0.4);
+
+  /* chart palette for dark mode (brighter, still Katlego-coded) */
+  --chart-background: transparent;
+  --chart-foreground: #eaf1f9;
+  --chart-foreground-muted: #8ea0b4;
+  --chart-label: #93a4b9;
+  --chart-line-primary: #ff8a2a;
+  --chart-line-secondary: #4ea3ff;
+  --chart-crosshair: #5a6b81;
+  --chart-grid: rgba(255, 255, 255, 0.08);
+  --chart-indicator-color: #ff8a2a;
+  --chart-indicator-secondary-color: #4ea3ff;
+  --chart-marker-background: #1a2940;
+  --chart-marker-border: #eaf1f9;
+  --chart-marker-foreground: #b9c8d9;
+  --chart-marker-badge-background: #ff8a2a;
+  --chart-marker-badge-foreground: #141414;
+  --chart-brush-border: #5a6b81;
+  --chart-tooltip-background: #0b1524;
+  --chart-tooltip-foreground: #eaf1f9;
+  --chart-tooltip-muted: #9aa9bd;
+  --chart-segment-line: rgba(255, 255, 255, 0.1);
+  --chart-segment-background: rgba(255, 255, 255, 0.03);
+  --chart-1: #ff8a2a;   /* Katlego orange */
+  --chart-2: #ffc107;   /* amber */
+  --chart-3: #2fc48c;   /* emerald */
+  --chart-4: #4ea3ff;   /* sky */
+  --chart-5: #e8796a;   /* coral */
+  --chart-6: #38bdf8;   /* cyan */
+  --chart-7: #7f91a6;   /* slate */
+}
+
+.kgl, .kgl * { box-sizing: border-box; }
+.kgl { color: var(--kgl-text); }
+
+/* Glassy floating surface */
+.kgl .kgl-card {
+  background: var(--kgl-surface);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid var(--kgl-border);
+  border-radius: 22px;
+  box-shadow: var(--kgl-shadow);
+}
+
+.kgl input::placeholder { color: var(--kgl-faint); }
+
+/* Sidebar of the standalone Insights frame: hidden on small screens */
+.kgl .kgl-aside { display: none; }
+@media (min-width: 1080px) {
+  .kgl .kgl-aside { display: flex; }
+}
+.kgl .kgl-nav-hover:hover { background: rgba(255, 255, 255, 0.05); color: #fff; }
+

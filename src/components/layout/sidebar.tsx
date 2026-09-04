@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Car, Users, Bell, Settings,
-  LogOut, BarChart3, Menu, X, ChevronRight, Truck, Shield, MapPin,
+  LogOut, BarChart3, Menu, X, ChevronRight, Truck, Shield, MapPin, Activity,
 } from 'lucide-react'
 import { generateInitials } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
@@ -19,6 +19,7 @@ const adminNavItems = [
   { href: '/admin/vehicles', label: 'Fleet',        icon: Car },
   { href: '/admin/drivers',  label: 'All Drivers',  icon: Users },
   { href: '/admin/reports',  label: 'Reports',      icon: BarChart3 },
+  { href: '/admin/insights', label: 'Insights',     icon: Activity },
   { href: '/admin/users',    label: 'User Roles',   icon: Shield },
 ]
 
