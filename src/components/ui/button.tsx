@@ -1,4 +1,5 @@
-import { cn } from '@/lib/utils'
+'use client'
+
 import { LucideIcon } from 'lucide-react'
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -8,6 +9,21 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   iconRight?: LucideIcon
   loading?: boolean
   fullWidth?: boolean
+}
+
+const VARIANTS: Record<string, { bg: string; hoverBg: string; color: string; border?: string; shadow?: string }> = {
+  primary:   { bg: '#2563eb', hoverBg: '#1d4ed8', color: '#ffffff', shadow: '0 4px 14px rgba(37,99,235,0.28)' },
+  secondary: { bg: '#f1f5f9', hoverBg: '#e2e8f0', color: '#334155' },
+  ghost:     { bg: 'transparent', hoverBg: '#f1f5f9', color: '#475569' },
+  danger:    { bg: '#e11d48', hoverBg: '#be123c', color: '#ffffff', shadow: '0 4px 14px rgba(225,29,72,0.28)' },
+  success:   { bg: '#059669', hoverBg: '#047857', color: '#ffffff', shadow: '0 4px 14px rgba(5,150,105,0.28)' },
+  outline:   { bg: '#ffffff', hoverBg: '#f8fafc', color: '#334155', border: '1.5px solid #e2e8f0' },
+}
+
+const SIZES: Record<string, { h: number; px: number; fs: number; radius: number; gap: number; icon: number }> = {
+  sm: { h: 32, px: 12, fs: 12, radius: 10, gap: 6,  icon: 14 },
+  md: { h: 40, px: 16, fs: 14, radius: 12, gap: 8,  icon: 16 },
+  lg: { h: 48, px: 24, fs: 16, radius: 12, gap: 8,  icon: 20 },
 }
 
 export function Button({
@@ -20,48 +36,59 @@ export function Button({
   children,
   className,
   disabled,
+  style,
   ...props
 }: ButtonProps) {
-  const base = [
-    'inline-flex items-center justify-center gap-2 font-semibold rounded-xl',
-    'transition-all duration-150 focus-visible:outline-none focus-visible:ring-2',
-    'focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none select-none',
-    'whitespace-nowrap shrink-0',
-  ].join(' ')
-
-  const variants = {
-    primary:  'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 shadow-sm hover:shadow-md focus-visible:ring-blue-500',
-    secondary:'bg-slate-100 text-slate-700 hover:bg-slate-200 active:bg-slate-300 focus-visible:ring-slate-400',
-    ghost:    'bg-transparent text-slate-600 hover:bg-slate-100 active:bg-slate-200 focus-visible:ring-slate-400',
-    danger:   'bg-rose-600 text-white hover:bg-rose-700 active:bg-rose-800 shadow-sm hover:shadow-md focus-visible:ring-rose-500',
-    success:  'bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm hover:shadow-md focus-visible:ring-emerald-500',
-    outline:  'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 hover:border-slate-300 active:bg-slate-100 focus-visible:ring-slate-400',
-  }
-
-  const sizes = {
-    sm: 'h-8 px-3 text-xs',
-    md: 'h-10 px-4 text-sm',
-    lg: 'h-12 px-6 text-base',
-  }
-
-  const iconSize = size === 'sm' ? 'h-3.5 w-3.5' : size === 'lg' ? 'h-5 w-5' : 'h-4 w-4'
+  const v = VARIANTS[variant] ?? VARIANTS.primary
+  const s = SIZES[size] ?? SIZES.md
+  const isDisabled = disabled || loading
 
   return (
     <button
-      className={cn(base, variants[variant], sizes[size], fullWidth && 'w-full', className)}
-      disabled={disabled || loading}
+      className={className}
+      disabled={isDisabled}
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: s.gap,
+        height: s.h,
+        padding: `0 ${s.px}px`,
+        borderRadius: s.radius,
+        fontSize: s.fs,
+        fontWeight: 600,
+        fontFamily: 'inherit',
+        lineHeight: 1,
+        whiteSpace: 'nowrap',
+        cursor: isDisabled ? 'not-allowed' : 'pointer',
+        opacity: isDisabled ? 0.55 : 1,
+        // fullWidth must never combine with a forced flex-shrink — that is what
+        // caused the Cancel/Save footer to overflow and scroll horizontally.
+        width: fullWidth ? '100%' : 'auto',
+        minWidth: fullWidth ? 0 : undefined,
+        flexShrink: fullWidth ? 1 : 0,
+        boxSizing: 'border-box',
+        background: v.bg,
+        color: v.color,
+        border: v.border ?? 'none',
+        boxShadow: v.shadow ?? 'none',
+        transition: 'background 0.15s, box-shadow 0.15s, opacity 0.15s',
+        ...style,
+      }}
+      onMouseEnter={e => { if (!isDisabled) (e.currentTarget as HTMLElement).style.background = v.hoverBg }}
+      onMouseLeave={e => { if (!isDisabled) (e.currentTarget as HTMLElement).style.background = v.bg }}
       {...props}
     >
       {loading ? (
-        <svg className={cn('animate-spin shrink-0', iconSize)} viewBox="0 0 24 24" fill="none">
-          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+        <svg style={{ width: s.icon, height: s.icon, flexShrink: 0, animation: 'spin 0.75s linear infinite' }} viewBox="0 0 24 24" fill="none">
+          <circle opacity=".25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+          <path opacity=".75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
         </svg>
       ) : Icon ? (
-        <Icon className={cn('shrink-0', iconSize)} />
+        <Icon style={{ width: s.icon, height: s.icon, flexShrink: 0 }} />
       ) : null}
       {children && <span>{children}</span>}
-      {!loading && IconRight && <IconRight className={cn('shrink-0', iconSize)} />}
+      {!loading && IconRight && <IconRight style={{ width: s.icon, height: s.icon, flexShrink: 0 }} />}
     </button>
   )
 }

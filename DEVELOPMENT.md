@@ -227,7 +227,27 @@ Layout:
 - ALL grids converted to `gridTemplateColumns: repeat(auto-fill, minmax(Npx,1fr))`
 - ALL spacing/layout converted to inline `style={{}}` — no Tailwind for layout
 
-### Round 5 — Manager Team System (CURRENT)
+### Round 7 — UI cleanup (CURRENT)
+- Removed all License Number / class / expiry fields from driver creation + driver views
+  (admin adds license/registration details on the fleet vehicles instead)
+- Fixed horizontal scroll in modal footers: Button `fullWidth` no longer forces `flex-shrink:0`
+- Button component rewritten with pure inline styles (deterministic rendering)
+- Modal hardened: `overflow-x hidden`, `min-width 0` on card + body
+- Signup page no longer lets the public choose driver/manager/admin roles — users only
+- Map: attribution watermark removed + switched to Esri World Street Map (colourful, Google-like)
+- Reports per-manager table made responsive (minmax columns + overflow-x auto)
+
+### Round 6 — Admin/Manager Role Split
+Key decisions and changes:
+- Trips removed from admin panel (only drivers see trips)
+- Admin reports = system pulse only (no trip list)
+- User Roles = beautiful collapsible role-grouped panel, admin controls all signups
+- vehicles.manager_id added — admin assigns vehicle pools to managers
+- Manager drivers page gains "Add Driver" button → POST /api/manager/create-driver
+- Admin User Roles page gains "Add User" → POST /api/admin/create-user
+- Both API routes use auth.admin.createUser (email auto-confirmed)
+
+### Round 5 — Manager Team System
 New features being built:
 - `manager_drivers` join table: admin assigns drivers to managers
 - `vehicle_maintenance_requests` table: driver requests repair, manager requests status change

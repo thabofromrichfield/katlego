@@ -31,7 +31,6 @@ function StatusPill({ status }: { status: string }) {
 }
 
 const STATUS_OPTS     = [{ value: 'available', label: 'Available' }, { value: 'on_trip', label: 'On Trip' }, { value: 'off_duty', label: 'Off Duty' }, { value: 'leave', label: 'On Leave' }, { value: 'suspended', label: 'Suspended' }]
-const LICENSE_OPTS    = [{ value: 'code_8', label: 'Code 8' }, { value: 'code_10', label: 'Code 10' }, { value: 'code_14', label: 'Code 14' }, { value: 'pdp', label: 'PDP' }]
 
 /* ─── ADMIN: All Drivers + assign-to-manager ────────── */
 function AdminDrivers() {
@@ -63,20 +62,17 @@ function AdminDrivers() {
   useEffect(() => { load() }, [])
 
   const filtered = drivers.filter(d =>
-    [d.profiles?.full_name, d.license_number].join(' ').toLowerCase().includes(search.toLowerCase())
+    (d.profiles?.full_name ?? '').toLowerCase().includes(search.toLowerCase())
   )
 
   const openEdit = (d: any) => {
     setEditing(d)
-    setForm({ license_number: d.license_number ?? '', license_class: d.license_class ?? 'code_8', license_expiry: d.license_expiry ?? '', status: d.status ?? 'available', current_vehicle_id: d.current_vehicle_id ?? '' })
+    setForm({ status: d.status ?? 'available', current_vehicle_id: d.current_vehicle_id ?? '' })
   }
 
   const handleSave = async () => {
     setSaving(true)
     const { error } = await createClient().from('drivers').update({
-      license_number: form.license_number,
-      license_class: form.license_class,
-      license_expiry: form.license_expiry || null,
       status: form.status,
       current_vehicle_id: form.current_vehicle_id || null,
     }).eq('id', editing.id)
@@ -138,7 +134,6 @@ function AdminDrivers() {
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
                 {d.profiles?.phone && <span style={{ fontSize: 12, color: '#94a3b8', display: 'flex', alignItems: 'center', gap: 4 }}><Phone style={{ width: 12, height: 12 }} />{d.profiles.phone}</span>}
-                {d.license_number && <span style={{ fontSize: 12, fontFamily: 'monospace', color: '#94a3b8' }}>{d.license_number}</span>}
                 {d.vehicles && <span style={{ fontSize: 12, color: '#64748b' }}>🚗 {d.vehicles.make} {d.vehicles.model}</span>}
                 {d.rating && <span style={{ fontSize: 12, color: '#ca8a04', display: 'flex', alignItems: 'center', gap: 3 }}><Star style={{ width: 12, height: 12 }} />{Number(d.rating).toFixed(1)}</span>}
               </div>
@@ -155,9 +150,6 @@ function AdminDrivers() {
       {/* Edit modal */}
       <Modal isOpen={!!editing} onClose={() => setEditing(null)} title="Edit Driver">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <Input label="License Number" value={form.license_number ?? ''} onChange={e => setForm((f: any) => ({ ...f, license_number: e.target.value }))} />
-          <Select label="License Class" options={LICENSE_OPTS} value={form.license_class ?? 'code_8'} onChange={e => setForm((f: any) => ({ ...f, license_class: e.target.value }))} />
-          <Input label="License Expiry" type="date" value={form.license_expiry ?? ''} onChange={e => setForm((f: any) => ({ ...f, license_expiry: e.target.value }))} />
           <Select label="Status" options={STATUS_OPTS} value={form.status ?? 'available'} onChange={e => setForm((f: any) => ({ ...f, status: e.target.value }))} />
           <Select label="Assign Vehicle" options={[{ value: '', label: 'No vehicle' }, ...vehicles.map(v => ({ value: v.id, label: `${v.make} ${v.model} (${v.plate_number})` }))]} value={form.current_vehicle_id ?? ''} onChange={e => setForm((f: any) => ({ ...f, current_vehicle_id: e.target.value }))} />
         </div>
@@ -218,7 +210,7 @@ function ManagerDrivers({ managerId }: { managerId: string }) {
   const [showCreate, setShowCreate] = useState(false)
   const [creating,   setCreating]   = useState(false)
   const [showPw,     setShowPw]     = useState(false)
-  const [newDriver,  setNewDriver]  = useState({ full_name: '', email: '', password: '', phone: '', license_number: '', license_class: 'code_8', license_expiry: '' })
+  const [newDriver,  setNewDriver]  = useState({ full_name: '', email: '', password: '', phone: '' })
 
   const load = async () => {
     const { data, error } = await createClient().rpc('get_manager_team_stats', { p_manager_id: managerId })
@@ -243,14 +235,14 @@ function ManagerDrivers({ managerId }: { managerId: string }) {
       const res = await fetch('/api/manager/create-driver', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...newDriver, license_number: newDriver.license_number || undefined, license_expiry: newDriver.license_expiry || undefined }),
+        body: JSON.stringify({ ...newDriver }),
       })
       const json = await res.json()
       if (json.error) { toast.error(json.error) }
       else {
         toast.success(`${newDriver.full_name} added to your team ✅`)
         setShowCreate(false)
-        setNewDriver({ full_name: '', email: '', password: '', phone: '', license_number: '', license_class: 'code_8', license_expiry: '' })
+        setNewDriver({ full_name: '', email: '', password: '', phone: '' })
         setTimeout(load, 800)
       }
     } catch { toast.error('Failed to create driver') }
@@ -354,11 +346,6 @@ function ManagerDrivers({ managerId }: { managerId: string }) {
             </div>
           </div>
           <Input label="Phone (optional)" type="tel" placeholder="+27 82 000 0000" value={newDriver.phone} onChange={e => setNewDriver(d => ({ ...d, phone: e.target.value }))} />
-          <Input label="License Number (optional)" placeholder="Leave blank to auto-generate" value={newDriver.license_number} onChange={e => setNewDriver(d => ({ ...d, license_number: e.target.value }))} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-            <Select label="License Class" options={LICENSE_OPTS} value={newDriver.license_class} onChange={e => setNewDriver(d => ({ ...d, license_class: e.target.value }))} />
-            <Input label="Expiry Date" type="date" value={newDriver.license_expiry} onChange={e => setNewDriver(d => ({ ...d, license_expiry: e.target.value }))} />
-          </div>
         </div>
         <div style={{ display: 'flex', gap: 12, marginTop: 20, paddingTop: 14, borderTop: '1px solid #f1f5f9' }}>
           <Button variant="outline" onClick={() => setShowCreate(false)} fullWidth>Cancel</Button>

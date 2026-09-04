@@ -59,14 +59,13 @@ export function LocationPicker({ lat, lng, label = 'Pickup', onPick }: LocationP
         zoom: 15,
         zoomControl: true,
         scrollWheelZoom: true,
-        attributionControl: true,
+        attributionControl: false, // removes the watermark / attribution badge
       })
 
-      // CartoDB Positron Light — clean, minimal, no API key required, Google Maps-like
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> © <a href="https://carto.com/">CARTO</a>',
-        subdomains: 'abcd',
+      // Esri World Street Map — colourful, Google-Maps-style, no API key required
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
         maxZoom: 19,
+        tileSize: 256,
       }).addTo(map)
 
       // Clean custom marker — simple dot with pulse
