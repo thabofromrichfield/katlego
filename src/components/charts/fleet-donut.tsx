@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { PieChart } from '@/components/charts/vendor/charts/pie-chart'
 import { PieSlice } from '@/components/charts/vendor/charts/pie-slice'
 import { PieCenter } from '@/components/charts/vendor/charts/pie-center'
-import { ChartTooltip } from '@/components/charts/vendor/charts/tooltip'
 
 interface DonutDatum {
   label: string
@@ -43,18 +42,8 @@ export function FleetDonut({
         {data.map((_, i) => (
           <PieSlice hoverEffect="grow" hoverOffset={6} index={i} key={i} />
         ))}
-        <ChartTooltip
-          content={({ point }) => {
-            const raw = point.value
-            const val = typeof raw === 'number' ? raw : Number(raw ?? 0)
-            return (
-              <div style={{ padding: '8px 10px', fontSize: 12 }}>
-                <p style={{ fontWeight: 700 }}>{String(point.label ?? '')}</p>
-                <p style={{ opacity: 0.8, marginTop: 2 }}>{val} · {pct(val)}%</p>
-              </div>
-            )
-          }}
-        />
+        {/* Note: bklit's ChartTooltip requires the area/line/bar ChartProvider,
+            so donuts keep their own hover-legend (below) instead of a tooltip. */}
         <PieCenter
           defaultLabel={centerLabel}
           formatOptions={{ maximumFractionDigits: 0 }}
