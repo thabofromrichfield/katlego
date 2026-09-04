@@ -59,6 +59,57 @@
   --transition-fast: 120ms ease;
   --transition-base: 200ms ease;
   --transition-slow: 350ms ease;
+
+  /* ── Chart theme (bklit-ui charts consume these) ──
+     Sequential scale tokens per upstream; values follow Katlego brand
+     (blue/navy/emerald/amber/rose) + colorblind-safe categorical set. */
+  --chart-background: #ffffff;
+  --chart-foreground: #0f172a;
+  --chart-foreground-muted: #64748b;
+  --chart-label: #475569;
+  --chart-line-primary: #2563eb;
+  --chart-line-secondary: #7c3aed;
+  --chart-crosshair: #94a3b8;
+  --chart-grid: #e2e8f0;
+  --chart-indicator-color: #2563eb;
+  --chart-indicator-secondary-color: #7c3aed;
+  --chart-marker-background: #ffffff;
+  --chart-marker-border: #0f172a;
+  --chart-marker-foreground: #475569;
+  --chart-marker-badge-background: #0f172a;
+  --chart-marker-badge-foreground: #ffffff;
+  --chart-brush-border: #94a3b8;
+  --chart-tooltip-background: #0f172a;
+  --chart-tooltip-foreground: #f8fafc;
+  --chart-tooltip-border: transparent;
+  --chart-segment-line: #e2e8f0;
+  --chart-segment-background: #f8fafc;
+  /* Data-series colors — 7-stop CVD-safe categorical (Tableau 10 core hues) */
+  --chart-1: #2563eb; /* blue    */
+  --chart-2: #f59e0b; /* amber   */
+  --chart-3: #10b981; /* emerald */
+  --chart-4: #8b5cf6; /* violet  */
+  --chart-5: #f43f5e; /* rose    */
+  --chart-6: #06b6d4; /* cyan    */
+  --chart-7: #64748b; /* slate   */
+  /* Sequential scale for heatmap-style fills (01 = low … 06 = high) */
+  --chart-scale-01: #eff6ff;
+  --chart-scale-02: #bfdbfe;
+  --chart-scale-03: #60a5fa;
+  --chart-scale-04: #3b82f6;
+  --chart-scale-05: #1d4ed8;
+  --chart-scale-06: #1e3a8a;
+}
+
+/* Respect reduced-motion: vendored charts gate entrance animations on this. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 /* ── Reset ── */
