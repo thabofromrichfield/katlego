@@ -11,11 +11,18 @@ import {
   AlertTriangle, TrendingUp, ArrowRight, Activity,
   Wifi, WifiOff, Star, Truck, BarChart3,
 } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 import { formatDateTime, formatStatus } from '@/lib/utils'
 import Link from 'next/link'
+import { ChartCard } from '@/components/charts/chart-card'
+import { TrendBadge } from '@/components/charts/trend-badge'
+import { TripTrendChart } from '@/components/charts/trip-trend-chart'
+import { FleetDonut } from '@/components/charts/fleet-donut'
+import { AvailabilitySplit } from '@/components/charts/availability-split'
+import { MiniBarChart } from '@/components/charts/mini-bar-chart'
 
 /* ─── Shared ─────────────────────────────────────────── */
-function StatBox({ label, value, sub, color, bg, icon: Icon }: { label: string; value: number | string; sub?: string; color: string; bg: string; icon: any }) {
+function StatBox({ label, value, sub, color, bg, icon: Icon }: { label: string; value: number | string; sub?: string; color: string; bg: string; icon: LucideIcon }) {
   return (
     <div style={{ background: 'white', borderRadius: 16, border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(15,23,42,0.06)', padding: 20, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', minWidth: 0 }}>
       <div style={{ minWidth: 0, flex: 1 }}>
@@ -52,6 +59,10 @@ function AdminDashboard() {
   const [stats, setStats] = useState({ totalVehicles: 0, availableVehicles: 0, totalDrivers: 0, availableDrivers: 0, pendingTrips: 0, activeTrips: 0, completedTrips: 0, totalTrips: 0 })
   const [urgentTrips, setUrgentTrips] = useState<any[]>([])
   const [recentTrips, setRecentTrips] = useState<any[]>([])
+  const [vehicleStatuses, setVehicleStatuses] = useState<{ status: string }[]>([])
+  const [driverStatuses, setDriverStatuses] = useState<{ status: string }[]>([])
+  const [history, setHistory] = useState<{ date: Date; count: number; completed: number }[]>([])
+  const [historyTrend, setHistoryTrend] = useState<number | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -63,6 +74,7 @@ function AdminDashboard() {
         { count: totalTrips }, { count: pendingTrips },
         { count: activeTrips }, { count: completedTrips },
         { data: recent }, { data: urgent },
+        { data: vStatuses }, { data: dStatuses },
       ] = await Promise.all([
         supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('is_active', true),
         supabase.from('vehicles').select('*', { count: 'exact', head: true }).eq('status', 'available').eq('is_active', true),
@@ -74,10 +86,32 @@ function AdminDashboard() {
         supabase.from('trips').select('*', { count: 'exact', head: true }).eq('status', 'completed'),
         supabase.from('trips').select('*, profiles!requester_id(full_name)').order('created_at', { ascending: false }).limit(6),
         supabase.from('trips').select('*, profiles!requester_id(full_name)').eq('status', 'pending').eq('priority', 'urgent').limit(5),
+        supabase.from('vehicles').select('status').eq('is_active', true),
+        supabase.from('drivers').select('status').eq('is_active', true),
       ])
       setStats({ totalVehicles: totalVehicles ?? 0, availableVehicles: availableVehicles ?? 0, totalDrivers: totalDrivers ?? 0, availableDrivers: availableDrivers ?? 0, pendingTrips: pendingTrips ?? 0, activeTrips: activeTrips ?? 0, completedTrips: completedTrips ?? 0, totalTrips: totalTrips ?? 0 })
       setRecentTrips(recent ?? [])
       setUrgentTrips(urgent ?? [])
+      setVehicleStatuses((vStatuses ?? []) as { status: string }[])
+      setDriverStatuses((dStatuses ?? []) as { status: string }[])
+
+      // 14-day trip volume for the trend chart
+      try {
+        const res = await fetch('/api/reports/trip-history?days=14')
+        if (res.ok) {
+          const j = await res.json()
+          const series = ((j.series ?? []) as { date: string; count: number; completed: number }[]).map(
+            (row) => ({ date: new Date(row.date + 'T00:00:00Z'), count: Number(row.count ?? 0), completed: Number(row.completed ?? 0) }),
+          )
+          setHistory(series)
+          const prev = Number(j.prevWindow ?? 0)
+          const curr = Number(j.currWindow ?? 0)
+          setHistoryTrend(prev > 0 ? Math.round(((curr - prev) / prev) * 1000) / 10 : null)
+        }
+      } catch {
+        /* chart falls back to empty state */
+      }
+
       setLoading(false)
     }
     load()
@@ -90,6 +124,24 @@ function AdminDashboard() {
 
   const vUtil = stats.totalVehicles ? Math.round((stats.availableVehicles / stats.totalVehicles) * 100) : 0
   const dUtil = stats.totalDrivers  ? Math.round((stats.availableDrivers  / stats.totalDrivers)  * 100) : 0
+
+  const countBy = (rows: { status: string }[], status: string) =>
+    rows.reduce((n, r) => n + (r.status === status ? 1 : 0), 0)
+
+  const fleetStatus = [
+    { label: 'Available', value: countBy(vehicleStatuses, 'available'), color: 'var(--chart-3)' },
+    { label: 'On Trip', value: countBy(vehicleStatuses, 'on_trip'), color: 'var(--chart-1)' },
+    { label: 'Maintenance', value: countBy(vehicleStatuses, 'maintenance'), color: 'var(--chart-2)' },
+    { label: 'Offline', value: countBy(vehicleStatuses, 'offline'), color: 'var(--chart-7)' },
+  ].filter((d) => d.value > 0)
+
+  const driverStatus = [
+    { label: 'Available', value: countBy(driverStatuses, 'available'), color: 'var(--chart-3)' },
+    { label: 'On Trip', value: countBy(driverStatuses, 'on_trip'), color: 'var(--chart-1)' },
+    { label: 'Off Duty', value: countBy(driverStatuses, 'off_duty'), color: 'var(--chart-7)' },
+    { label: 'On Leave', value: countBy(driverStatuses, 'leave'), color: 'var(--chart-2)' },
+    { label: 'Suspended', value: countBy(driverStatuses, 'suspended'), color: 'var(--chart-5)' },
+  ].filter((d) => d.value > 0)
 
   return (
     <div>
@@ -122,21 +174,44 @@ function AdminDashboard() {
         <StatBox label="Active Trips"    value={stats.activeTrips}    sub="Currently in motion"                     color="#059669" bg="#d1fae5" icon={TrendingUp} />
       </div>
 
+      {/* Operations trend — last 14 days */}
+      <div style={{ marginBottom: 20 }}>
+        <ChartCard
+          title="Trip Volume — last 14 days"
+          subtitle="Booked vs completed per day across the fleet"
+          action={historyTrend != null ? <TrendBadge value={historyTrend} /> : undefined}
+        >
+          {history.length > 0 ? (
+            <TripTrendChart data={history} />
+          ) : (
+            <div style={{ textAlign: 'center', padding: '48px 0', color: '#94a3b8' }}>
+              <p>No trip history yet — bookings will appear here.</p>
+            </div>
+          )}
+        </ChartCard>
+      </div>
+
+      {/* Totals + live status composition */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 20 }}>
         <StatBox label="Completed Trips" value={stats.completedTrips} color="#059669" bg="#d1fae5" icon={CheckCircle} />
         <StatBox label="Total Trips"     value={stats.totalTrips}     color="#475569" bg="#f1f5f9" icon={ClipboardList} />
-        <div style={{ background: 'white', borderRadius: 16, border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(15,23,42,0.06)', padding: 20 }}>
-          <p style={{ fontSize: 13, fontWeight: 700, color: '#374151', marginBottom: 16 }}>Fleet Availability</p>
-          {[{ label: 'Vehicles', val: vUtil, a: stats.availableVehicles, t: stats.totalVehicles, c: '#2563eb' }, { label: 'Drivers', val: dUtil, a: stats.availableDrivers, t: stats.totalDrivers, c: '#7c3aed' }].map(r => (
-            <div key={r.label} style={{ marginBottom: 14 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, fontWeight: 600, color: '#64748b', marginBottom: 6 }}>
-                <span>{r.label}</span><span style={{ color: '#0f172a' }}>{r.a}/{r.t}</span>
-              </div>
-              <div style={{ height: 8, background: '#f1f5f9', borderRadius: 99, overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${r.val}%`, background: r.c, borderRadius: 99 }} />
-              </div>
-            </div>
-          ))}
+        <div style={{ minWidth: 0 }}>
+          <ChartCard title="Fleet Status" subtitle={`${stats.availableVehicles} of ${stats.totalVehicles} vehicles available (${vUtil}%)`}>
+            {fleetStatus.length > 0 ? (
+              <FleetDonut centerLabel="Vehicles" data={fleetStatus} size={200} />
+            ) : (
+              <p style={{ fontSize: 13, color: '#94a3b8', padding: '20px 0' }}>No vehicles yet</p>
+            )}
+          </ChartCard>
+        </div>
+        <div style={{ minWidth: 0 }}>
+          <ChartCard title="Driver Availability" subtitle={`${stats.availableDrivers} of ${stats.totalDrivers} drivers online (${dUtil}%)`}>
+            {driverStatus.length > 0 ? (
+              <AvailabilitySplit data={driverStatus} />
+            ) : (
+              <p style={{ fontSize: 13, color: '#94a3b8', padding: '20px 0' }}>No drivers yet</p>
+            )}
+          </ChartCard>
         </div>
       </div>
 
@@ -212,6 +287,26 @@ function ManagerDashboard({ managerId }: { managerId: string }) {
   const totalTrips = team.reduce((s, d) => s + (d.total_trips ?? 0), 0)
   const avgRating  = team.length ? (team.reduce((s, d) => s + (Number(d.rating) || 0), 0) / team.length).toFixed(1) : '—'
 
+  const availCount = (statuses: string[]) =>
+    team.filter((d) => statuses.includes(d.driver_status)).length
+  const teamAvailability = [
+    { label: 'Available', value: online, color: 'var(--chart-3)' },
+    { label: 'On Trip', value: onTrip, color: 'var(--chart-1)' },
+    { label: 'Off Duty', value: availCount(['off_duty']), color: 'var(--chart-7)' },
+    { label: 'On Leave', value: availCount(['leave']), color: 'var(--chart-2)' },
+    { label: 'Suspended', value: availCount(['suspended']), color: 'var(--chart-5)' },
+  ].filter((d) => d.value > 0)
+
+  const shortName = (full: string) => {
+    const parts = (full ?? '').trim().split(/\s+/)
+    if (parts.length === 0) return '?'
+    return parts[0] + (parts.length > 1 ? ` ${parts[parts.length - 1][0]}.` : '')
+  }
+  const driverTripBars = [...team]
+    .sort((a, b) => (b.total_trips ?? 0) - (a.total_trips ?? 0))
+    .slice(0, 8)
+    .map((d) => ({ label: shortName(d.driver_name ?? 'Driver'), value: d.total_trips ?? 0 }))
+
   const filtered = team.filter(d =>
     (d.driver_name ?? '').toLowerCase().includes(search.toLowerCase()) ||
     (d.employee_id ?? '').toLowerCase().includes(search.toLowerCase())
@@ -230,6 +325,26 @@ function ManagerDashboard({ managerId }: { managerId: string }) {
         <StatBox label="Total Trips"    value={totalTrips}   sub="all time, team total"     color="#d97706" bg="#fef3c7" icon={BarChart3} />
         <StatBox label="Avg Rating"     value={avgRating}    sub="team average"             color="#ca8a04" bg="#fef9c3" icon={Star} />
       </div>
+
+      {/* Team charts */}
+      {team.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 20, marginBottom: 20 }}>
+          <ChartCard title="Team Availability" subtitle="Live status composition of your drivers">
+            {teamAvailability.length > 0 ? (
+              <FleetDonut centerLabel="Team" data={teamAvailability} size={200} />
+            ) : (
+              <p style={{ fontSize: 13, color: '#94a3b8', padding: '20px 0' }}>No drivers with status yet</p>
+            )}
+          </ChartCard>
+          <ChartCard title="Trips by Driver" subtitle="All-time total trips — top 8 drivers">
+            {driverTripBars.length > 0 ? (
+              <MiniBarChart color="var(--chart-4)" data={driverTripBars} showAxis />
+            ) : (
+              <p style={{ fontSize: 13, color: '#94a3b8', padding: '20px 0' }}>No trip activity yet</p>
+            )}
+          </ChartCard>
+        </div>
+      )}
 
       {/* Driver table */}
       <div style={{ background: 'white', borderRadius: 16, border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(15,23,42,0.06)' }}>
