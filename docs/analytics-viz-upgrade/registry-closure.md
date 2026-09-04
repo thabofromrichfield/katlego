@@ -1,12 +1,50 @@
+# bklit-ui vendored chart registry — closure
+
+Generated from `scripts/bklit/vendor-registry.mjs` (source of truth).
+
+- Registry items in closure: **18**
+- File mentions across items: **126**
+- Unique files under `src/components/charts/vendor/`: **104**
+- Upstream registry source: `/home/user/.cache/bk-ref/apps/web/public/r`
+- Rewrites applied per item below: `@/lib/utils` → `@/components/charts/vendor/lib/utils`
+- Runtime deps added to `package.json`: `@visx/*@4.0.1-alpha.0`, `d3-*`, `motion`, `@number-flow/react`, `@base-ui/react`, `clsx`, `tailwind-merge`
+- No `@bklit/*` imports remain in vendored sources (script throws otherwise).
+- CSS: chart theme custom properties live in `src/app/globals.css` (`--chart-1…7`, `--chart-*` tokens, sequential scale). Chart `text/bg-chart-*` Tailwind utilities are registered via an `@theme inline` block in the same file.
+
+## Closure list
+
+- `utils`
+- `chart-utils`
+- `chart-context`
+- `chart-animation`
+- `chart-tooltip`
+- `chart-series`
+- `grid`
+- `x-axis`
+- `shimmering-text`
+- `area-chart`
+- `line-chart`
+- `bar-chart`
+- `pie-chart`
+- `ring-chart`
+- `gauge-chart`
+- `legend`
+- `chart-stat-flow`
+- `y-axis`
+
+## Item detail
+
 ## utils
 deps: clsx, tailwind-merge
 files:
   - src/lib/utils.ts
+
 ## chart-utils
 files:
   - src/charts/chart-formatters.ts
   - src/charts/decimate-time-series.ts
   - src/charts/use-scheduled-tooltip.ts
+
 ## chart-context
 deps: @visx/event@4.0.1-alpha.0, @visx/responsive@4.0.1-alpha.0, @visx/scale@4.0.1-alpha.0, d3-array, motion
 reg-deps: @bklit/utils, @bklit/chart-utils
@@ -23,6 +61,7 @@ files:
   - src/charts/use-animated-y-domains.ts
   - src/charts/use-chart-phase-orchestrator.ts
   - src/charts/line-loading-timing.ts
+
 ## chart-animation
 deps: motion
 files:
@@ -33,6 +72,7 @@ files:
   - src/charts/chart-reveal-clip.tsx
   - src/charts/static-chart-preview-context.tsx
   - src/charts/chart-defs.ts
+
 ## chart-tooltip
 deps: @number-flow/react, motion
 reg-deps: @bklit/chart-context, @bklit/utils
@@ -46,6 +86,7 @@ files:
   - src/charts/tooltip/tooltip-indicator.tsx
   - src/charts/tooltip/date-ticker.tsx
   - src/charts/tooltip/index.ts
+
 ## chart-series
 deps: @visx/shape@4.0.1-alpha.0, d3-shape, motion
 reg-deps: @bklit/chart-context, @bklit/chart-animation, @bklit/chart-tooltip
@@ -65,21 +106,25 @@ files:
   - src/charts/use-highlight-segment.ts
   - src/charts/area-gradient-defs.tsx
   - src/charts/fade-edges.ts
+
 ## grid
 deps: @visx/grid@4.0.1-alpha.0
 reg-deps: @bklit/chart-context
 files:
   - src/charts/grid.tsx
   - src/charts/use-grid-shimmer.ts
+
 ## x-axis
 reg-deps: @bklit/chart-context, @bklit/utils
 files:
   - src/charts/x-axis.tsx
+
 ## shimmering-text
 deps: motion
 reg-deps: @bklit/utils
 files:
   - src/components/shimmering-text.tsx
+
 ## area-chart
 deps: @visx/curve@4.0.1-alpha.0, @visx/gradient@4.0.1-alpha.0, @visx/shape@4.0.1-alpha.0, motion
 reg-deps: @bklit/chart-context, @bklit/chart-animation, @bklit/chart-series, @bklit/grid, @bklit/x-axis, @bklit/chart-tooltip, @bklit/shimmering-text, @bklit/utils
@@ -98,6 +143,7 @@ files:
   - src/charts/line-loading-timing.ts
   - src/charts/chart-loading-label.tsx
   - src/charts/pattern-area.tsx
+
 ## line-chart
 deps: @visx/curve@4.0.1-alpha.0, @visx/shape@4.0.1-alpha.0, motion
 reg-deps: @bklit/chart-context, @bklit/chart-animation, @bklit/chart-series, @bklit/grid, @bklit/x-axis, @bklit/chart-tooltip, @bklit/shimmering-text, @bklit/utils
@@ -118,6 +164,7 @@ files:
   - src/charts/loading-sweep.tsx
   - src/charts/line-loading-timing.ts
   - src/charts/chart-loading-label.tsx
+
 ## bar-chart
 deps: @visx/gradient@4.0.1-alpha.0, @visx/pattern@4.0.1-alpha.0, @visx/shape@4.0.1-alpha.0, motion
 reg-deps: @bklit/chart-context, @bklit/chart-animation, @bklit/grid, @bklit/chart-tooltip, @bklit/utils
@@ -135,6 +182,7 @@ files:
   - src/charts/bar-y-axis.tsx
   - src/charts/loading-sweep.tsx
   - src/charts/bar-chart-loading.tsx
+
 ## pie-chart
 deps: @number-flow/react, @visx/group@4.0.1-alpha.0, @visx/responsive@4.0.1-alpha.0, @visx/shape@4.0.1-alpha.0, d3-shape, motion
 reg-deps: @bklit/chart-animation, @bklit/utils
@@ -146,6 +194,7 @@ files:
   - src/charts/pie-center-shell.tsx
   - src/charts/pie-center.tsx
   - src/charts/chart-center-typography.ts
+
 ## ring-chart
 deps: @visx/group@4.0.1-alpha.0, @visx/responsive@4.0.1-alpha.0, @visx/shape@4.0.1-alpha.0, @number-flow/react, motion
 reg-deps: @bklit/chart-animation, @bklit/utils
@@ -156,6 +205,7 @@ files:
   - src/charts/chart-stat-flow.tsx
   - src/charts/ring-center.tsx
   - src/charts/chart-center-typography.ts
+
 ## gauge-chart
 deps: @visx/responsive@4.0.1-alpha.0, @visx/pattern@4.0.1-alpha.0, @number-flow/react, motion, d3-shape
 reg-deps: @bklit/utils
@@ -168,3 +218,28 @@ files:
   - src/charts/notch-gauge-shared.ts
   - src/charts/gauge-label-layout.tsx
   - src/charts/chart-center-typography.ts
+
+## legend
+deps: @base-ui/react, @number-flow/react
+reg-deps: @bklit/utils, @bklit/chart-utils
+files:
+  - src/charts/legend/legend.tsx
+  - src/charts/legend/legend-context.tsx
+  - src/charts/legend/legend-item.tsx
+  - src/charts/legend/legend-label.tsx
+  - src/charts/legend/legend-marker.tsx
+  - src/charts/legend/legend-progress.tsx
+  - src/charts/legend/legend-value.tsx
+  - src/charts/legend/index.ts
+
+## chart-stat-flow
+deps: @number-flow/react, motion
+reg-deps: @bklit/utils
+files:
+  - src/charts/chart-stat-flow.tsx
+
+## y-axis
+reg-deps: @bklit/chart-context, @bklit/utils
+files:
+  - src/charts/y-axis.tsx
+  - src/charts/reference-area-geometry.ts
