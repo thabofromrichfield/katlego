@@ -29,7 +29,9 @@ export async function proxy(request: NextRequest) {
   const pathname = url.pathname
 
   // Public paths that never need auth
-  const publicPaths = ['/login', '/register', '/forgot-password', '/diag', '/api/auth']
+  // TEMP (Sentry verification): sentry-example routes are allowlisted so the
+  // wizard's test-error flow works without a session. Remove once verified.
+  const publicPaths = ['/login', '/register', '/forgot-password', '/diag', '/api/auth', '/sentry-example-page', '/api/sentry-example-api']
   const isPublicPath = publicPaths.some((p) => pathname.startsWith(p))
 
   // Always allow public paths and static assets
@@ -80,6 +82,8 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    // monitoring is excluded so Sentry's client tunnel route can forward
+    // error envelopes to Sentry without auth (see withSentryConfig tunnelRoute).
+    '/((?!monitoring|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
