@@ -83,7 +83,37 @@ Optional constraints so tools only ever touch this project:
 npx @sentry/mcp-server --organization-slug <org> --project-slug katlego
 ```
 
-## 4. Verify
+## 4. Katlego debug server (local MCP, Sentry-instrumented)
+
+The repo ships its own small MCP server — **`mcp/katlego-debug.mjs`** — built
+exactly on the Sentry wrapper pattern:
+
+```js
+import * as Sentry from "@sentry/node";
+Sentry.init({ dsn, tracesSampleRate: 1.0 });
+const server = Sentry.wrapMcpServerWithSentry(new McpServer({ name: "katlego-debug", ... }));
+```
+
+It reads the same DSN the app uses (`NEXT_PUBLIC_SENTRY_DSN` from `.env.local`,
+or `SENTRY_DSN`), so once you set the DSN above, every tool call, session and
+raised error on this server is reported to your Sentry project.
+
+Tools:
+- `env_status` — which infra env vars are configured (values never shown)
+- `typecheck` — run `tsc --noEmit`, optional text filter
+- `lint` — run eslint over a path
+- `list_routes` — map `src/app` → URL routes
+- `sentry_probe` — recent unresolved issues straight from the Sentry API
+
+Run it: `npm run mcp:katlego`. It's already registered in `.vscode/mcp.json`
+as **`katlego-debug`** alongside the official **`sentry`** server, so VSCode /
+GitHub Copilot exposes both. For Claude/Cursor, add:
+
+```json
+{ "mcpServers": { "katlego-debug": { "command": "node", "args": ["mcp/katlego-debug.mjs"] } } }
+```
+
+## 5. Verify
 
 | Check | Command | Expected |
 |---|---|---|

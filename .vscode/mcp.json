@@ -1,10 +1,15 @@
 {
-  "//": "Sentry MCP server for VSCode / GitHub Copilot. No secrets in this file: authenticate once with `npx @sentry/mcp-server auth login` (device flow) or export SENTRY_ACCESS_TOKEN before launching VSCode. See docs/sentry-setup.md.",
+  "//": "MCP servers for VSCode / GitHub Copilot. No secrets in this file. - sentry: the official Sentry MCP server (device-flow auth via `npm run sentry:login`). - katlego-debug: local Katlego debug server (typecheck/lint/routes/env/Sentry probe), Sentry-instrumented via wrapMcpServerWithSentry. See docs/sentry-setup.md.",
   "servers": {
     "sentry": {
       "type": "stdio",
       "command": "npx",
       "args": ["-y", "@sentry/mcp-server"]
+    },
+    "katlego-debug": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["mcp/katlego-debug.mjs"]
     }
   }
 }
