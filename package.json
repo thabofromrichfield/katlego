@@ -9,12 +9,10 @@
     "lint": "eslint",
     "sentry:mcp": "sentry-mcp",
     "sentry:login": "sentry-mcp auth login",
-    "sentry:status": "sentry-mcp auth status",
-    "mcp:katlego": "node mcp/katlego-debug.mjs"
+    "sentry:status": "sentry-mcp auth status"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
-    "@modelcontextprotocol/sdk": "^1.30.0",
     "@number-flow/react": "^0.6.2",
     "@radix-ui/react-avatar": "^1.2.6",
     "@radix-ui/react-dialog": "^1.1.23",
@@ -22,7 +20,6 @@
     "@radix-ui/react-select": "^2.3.7",
     "@radix-ui/react-tabs": "^1.1.21",
     "@sentry/nextjs": "^10.73.0",
-    "@sentry/node": "^10.73.0",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.112.4",
     "@types/leaflet": "^1.9.22",
