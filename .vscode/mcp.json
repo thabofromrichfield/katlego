@@ -1,0 +1,14 @@
+{
+  "//": "MCP servers for VS Code + GitHub Copilot (agent mode). No secrets live here. sentry: remote OAuth server (sign in with your Sentry account once; browser popup handled by VS Code). playwright: local browser-driving server for autonomous app testing. Full guide: docs/agent-testing.md",
+  "servers": {
+    "sentry": {
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp"
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    }
+  }
+}
